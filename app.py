@@ -5,6 +5,7 @@ import io, os, string, re
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 from properties import create_header, create_body, parse_ms_instrument, extract_scan_count
+from peaks import detect_peaks
 import pyopenms as oms
 
 app = Flask(__name__)
@@ -53,28 +54,7 @@ app = Flask(__name__)
 
 
 
-def detect_peaks(file_path):
-    lst = []
-    # Load the mzXML file
-    exp = oms.MSExperiment()
-    oms.MzXMLFile().load(file_path, exp)
 
-    # Initialize the peak picker
-    picker = oms.PeakPickerHiRes()
-
-    # Perform peak picking
-    picked_exp = oms.MSExperiment()
-    picker.pickExperiment(exp, picked_exp)
-
-    # Print the detected peaks
-    for spectrum in picked_exp:
-        scan_num = spectrum.getNativeID()
-
-        for peak in spectrum:
-            mz = peak.getMZ()
-            intensity = peak.getIntensity()
-            lst.append({scan_num : [mz, intensity]})
-    return lst
 
 mzxml_file = "test1.mzxml"
 
@@ -87,11 +67,11 @@ def index():
     scanCount = extract_scan_count(mzxml_file)
     return render_template("index.html", header=header, body = body, meta = meta, scanCount = scanCount)
 
-@app.route("/peaks", methods = ["GET"])
-def peaks():
-    peaks = detect_peaks(mzxml_file)
+@app.route("/peaks<scan_num>", methods = ["GET"])
+def peaks(scan_num):
+    peaks = detect_peaks(mzxml_file, scan_num)
     val = peaks
-    return render_template("peaks.html", peaks = peaks)
+    return render_template("peaks.html", peaks = peaks, scan = scanNum)
 
 if __name__ == '__main__':
     app.run(debug=True)

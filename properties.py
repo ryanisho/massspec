@@ -47,7 +47,12 @@ def create_body(mzxml_file):
                 for prop in properties_list:
                     key, value = prop.split('=', 1)
                     properties_dict[key] = value.strip('"')
-                    
+                
+                # Clean up retentionTime value to remain with the double value
+                rt = 'retentionTime'
+                if len(properties_dict[rt]) != 0:
+                    end = len(str(properties_dict[rt])) - 1
+                    properties_dict[rt] = (properties_dict[rt])[2:end]
                 # Append properties_dict to the scan_list
                 scan_list.append(properties_dict)
     return scan_list
