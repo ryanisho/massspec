@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mzXML Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>mzXML Metadata Table</h1>
+    <table>
+      <tr>
+        {% for key in meta.items() %}
+        <th scope = "col">{{ key[0] }}</th>
+        {% endfor %}
+      </tr>
+      <tbody>
+            <tr>
+            {% for key, value in meta.items() %}
+                {% if key == 'software' %}
+                    <td scope = "row">{{ value.type }} <br> {{ value.name }} <br> {{ value.version }}</td>
+                {% elif key == 'operator' %}
+                    <td scope = "row>">{{ value.first}} <br> {{ value.last }}</td>
+                {% else %}
+                    {% if value.value == ""%}
+                    <td scope = "row">N/A</td>
+                    {% else %}
+                    <td scope = "row">{{ value.value }}</td>
+                    {% endif %}
+                {% endif %}
+
+              {% endfor %}
+            </tr>
+      </tbody>
+    </table>
+    <br>
+    Scan Count = {{ scanCount }}
+    <br>
+    <br>
+    <h1>mzXML Properties Table</h1>
+    <table class="table">
+      <thead>
+        <tr>
+            {% for h in header %}
+            <th scope="col">{{ h }}</th>
+            {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+            {% for dict in body %}
+            <tr>
+                {% for h in header %}
+                  <th scope="row">{{ dict[h] }}</th>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+      </tbody>
+    </table>
+</body>
+</html>
