@@ -1,10 +1,10 @@
 
-from flask import Flask, render_template, request, render_template_string
+from flask import Flask, render_template, request, render_template_string, redirect
 from pyopenms import MSExperiment, MzXMLFile
 import io, os, string, re
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
-from properties import create_header, create_body, parse_ms_instrument, extract_scan_count
+from properties import *
 import pyopenms as oms
 
 app = Flask(__name__)
@@ -51,47 +51,53 @@ app = Flask(__name__)
         # xml_file = "output.xml"
         # mzxml_to_xml(mzxml_file, xml_file)
 
-
-
-def detect_peaks(file_path):
-    lst = []
-    # Load the mzXML file
-    exp = oms.MSExperiment()
-    oms.MzXMLFile().load(file_path, exp)
-
-    # Initialize the peak picker
-    picker = oms.PeakPickerHiRes()
-
-    # Perform peak picking
-    picked_exp = oms.MSExperiment()
-    picker.pickExperiment(exp, picked_exp)
-
-    # Print the detected peaks
-    for spectrum in picked_exp:
-        scan_num = spectrum.getNativeID()
-
-        for peak in spectrum:
-            mz = peak.getMZ()
-            intensity = peak.getIntensity()
-            lst.append({scan_num : [mz, intensity]})
-    return lst
-
-mzxml_file = "test1.mzxml"
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #Main Flask App
-@app.route("/", methods = ["GET", "POST"])
+@app.route("/", methods = ["GET"])
 def index():
-    header = create_header(mzxml_file)
-    body = list(create_body(mzxml_file))
-    meta = parse_ms_instrument(mzxml_file)
-    scanCount = extract_scan_count(mzxml_file)
-    return render_template("index.html", header=header, body = body, meta = meta, scanCount = scanCount)
+    return render_template("index.html")
 
-@app.route("/peaks", methods = ["GET"])
-def peaks():
-    peaks = detect_peaks(mzxml_file)
-    val = peaks
-    return render_template("peaks.html", peaks = peaks)
+@app.route("/info", methods = ["GET", "POST"])
+def info():
+     # Check if a file is present in the request
+    if 'fileUpload' not in request.files:
+        #flash('No file found')
+        return redirect(request.url)
+
+    file = request.files['fileUpload']
+
+    # If the file is empty or has an invalid extension, show an error message
+    if file.filename == '' or not allowed_file(file.filename):
+        #flash('Invalid file')
+        return redirect(request.url)
+
+    # Save the file to the upload folder and parse it
+    if file and allowed_file(file.filename):
+        filename = file.filename
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        #flash('File uploaded and parsed successfully') 
+        mzxml_file = filename
+        header = create_header(mzxml_file)
+        body = list(create_body(mzxml_file))
+        meta = parse_ms_instrument(mzxml_file)
+        scanCount = extract_scan_count(mzxml_file)
+        possibleCombo = findCombo(500)
+
+        return render_template("table.html", header=header, body = body, meta = meta, scanCount = scanCount, possibleCombo = possibleCombo, mzxml_file = mzxml_file)
+
+
+@app.route("/peaks/<mzxml_file>/<int:value>", methods = ["GET", "POST"])
+def peaks(mzxml_file, value):
+    if (request.method == "GET"):
+        peaks = detect_peaks(mzxml_file, value)
+        return render_template("peaks.html", peaks = peaks)
+    else:
+        peaks = detect_peaks(mzxml_file, value)
+        return render_template("peaks.html", peaks = peaks)
 
 if __name__ == '__main__':
     app.run(debug=True)
