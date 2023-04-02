@@ -1,6 +1,8 @@
 import re
 import pyopenms as oms
 from pyopenms import MSExperiment, MzXMLFile
+import xml.etree.ElementTree as ET
+import xml.dom.minidom
 
 # Checks for file extension - extra protocol
 ALLOWED_EXTENSIONS = {'mzxml'}
@@ -140,7 +142,7 @@ def findCombo(molarMass):
     oxygenMass = 16.00
     tolerance = 0.1
 
-    c = 0
+    c = 1
     h = 0
     o = 0
 
@@ -158,3 +160,32 @@ def findCombo(molarMass):
         c += 1 
         h = 0
 
+def remove_namespace(tag):
+    return tag.split('}')[-1]
+
+def mzxml_to_xml(mzxml_file, xml_file):
+    # Parse the mzXML file
+    tree = ET.parse(mzxml_file)
+    root = tree.getroot()
+
+    # Create a new XML root element
+    new_root = ET.Element(remove_namespace(root.tag))
+
+    # Iterate through the mzXML elements and copy them to the new XML file
+    for element in root:
+        new_element = ET.SubElement(new_root, remove_namespace(element.tag))
+
+        for attr_key, attr_value in element.attrib.items():
+            new_element.set(attr_key, attr_value)
+
+        for child in element:
+            new_child = ET.SubElement(new_element, remove_namespace(child.tag))
+
+            for child_attr_key, child_attr_value in child.attrib.items():
+                new_child.set(child_attr_key, child_attr_value)
+
+    # Write the new XML file
+    new_tree = ET.ElementTree(new_root)
+    new_tree.write(xml_file, encoding="utf-8", xml_declaration=True)
+    # dom = xml.dom.minidom.parse(xml_file) # or xml.dom.minidom.parseString(xml_string)
+    # pretty_xml_as_string = dom.toprettyxml()
