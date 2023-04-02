@@ -7,27 +7,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   </head>
   <body>
-    <div class="container">
-        Scan Number = #
+    <nav class="navbar navbar-dark bg-dark">
+    <!-- Navbar content -->
+    </nav>
+    <div class="container" style = "padding-top: 50px;">
+        <h2>Peak and Compound Information for Scan {{ value }}</h2>
       <table class="table table-sm">
         <thead>
           <tr>
-            <th scope="col">m/z</th>
+            <th scope = "col">Peak #</th>
+            <th scope = "col">m/z</th>
             <th scope="col">Intensity</th>
             <th scope="col">Possible Compound</th>
           </tr>
         </thead>
         <tbody>
-            {% for peak in peaks%}
-                {{ peak.key }}
+            {% for t in range(0, peakLen) %}
+           <tr>
+               <td scope = "row">{{ t }}</td> 
+               <td scope = "row">{{peaks[t][index][0]}}</td>
+               <td scope = "row">{{peaks[t][index][1]}}</td>
+               <td scope = "row">C{{possibleCombo[t][0]}} H{{possibleCombo[t][1]}} O{{possibleCombo[t][2]}}</td>
+           </tr>
             {% endfor %}
-
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
         </tbody>
       </table>
     </div>
