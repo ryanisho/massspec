@@ -1,14 +1,11 @@
 
-from flask import Flask, render_template, request, render_template_string, jsonify, json
+from flask import Flask, render_template, request, render_template_string, redirect
 from pyopenms import MSExperiment, MzXMLFile
 import io, os, string, re
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
-from properties import create_header, create_body, parse_ms_instrument, extract_scan_count
-from peaks import detect_peaks
+from properties import *
 import pyopenms as oms
-import pubchempy as pcp
-import requests
 
 app = Flask(__name__)
 
@@ -54,53 +51,53 @@ app = Flask(__name__)
         # xml_file = "output.xml"
         # mzxml_to_xml(mzxml_file, xml_file)
 
-
-
-
-
-mzxml_file = "test1.mzxml"
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #Main Flask App
-@app.route("/", methods = ["GET", "POST"])
+@app.route("/", methods = ["GET"])
 def index():
-    header = create_header(mzxml_file)
-    body = list(create_body(mzxml_file))
-    meta = parse_ms_instrument(mzxml_file)
-    scanCount = extract_scan_count(mzxml_file)
-    return render_template("index.html", header=header, body = body, meta = meta, scanCount = scanCount)
+    return render_template("index.html")
 
-@app.route("/peaks<scan_num>", methods = ["GET"])
-def peaks(scan_num):
-    peaks = detect_peaks(mzxml_file, scan_num)
-    val = peaks
-    return render_template("peaks.html", peaks = peaks, scan = scan_num)
+@app.route("/info", methods = ["GET", "POST"])
+def info():
+     # Check if a file is present in the request
+    if 'fileUpload' not in request.files:
+        #flash('No file found')
+        return redirect(request.url)
 
-@app.route('/search', methods=['POST'])
-def search():
-    molecular_weight = float(request.form['molecular_weight'])
+    file = request.files['fileUpload']
 
-    compound_list = search_compounds_by_molecular_weight(molecular_weight)
+    # If the file is empty or has an invalid extension, show an error message
+    if file.filename == '' or not allowed_file(file.filename):
+        #flash('Invalid file')
+        return redirect(request.url)
 
-    if compound_list:
-        return jsonify(compound_list[0])  # Return only the first compound found
+    # Save the file to the upload folder and parse it
+    if file and allowed_file(file.filename):
+        filename = file.filename
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        #flash('File uploaded and parsed successfully') 
+        mzxml_file = filename
+        header = create_header(mzxml_file)
+        body = list(create_body(mzxml_file))
+        meta = parse_ms_instrument(mzxml_file)
+        scanCount = extract_scan_count(mzxml_file)
+        possibleCombo = findCombo(500)
+
+        return render_template("table.html", header=header, body = body, meta = meta, scanCount = scanCount, possibleCombo = possibleCombo, mzxml_file = mzxml_file)
+
+
+@app.route("/peaks/<mzxml_file>/<int:value>", methods = ["GET", "POST"])
+def peaks(mzxml_file, value):
+    if (request.method == "GET"):
+        peaks = detect_peaks(mzxml_file, value)
+        return render_template("peaks.html", peaks = peaks)
     else:
-        return jsonify({"error": "No compounds found with the given molecular weight."})
-    return render_template()
-
-def search_compounds_by_molecular_weight(molecular_weight, tolerance=0.1):
-    compounds = pcp.get_compounds(molecular_weight, 'formula_weight', searchtype='range', range_start=molecular_weight-tolerance, range_end=molecular_weight+tolerance)
-
-    compound_list = []
-    for compound in compounds:
-        compound_data = {
-            "cid": compound.cid,
-            "name": compound.name,
-            "molecular_weight": compound.molecular_weight
-        }
-        compound_list.append(compound_data)
-
-    return compound_list
-
+        peaks = detect_peaks(mzxml_file, value)
+        return render_template("peaks.html", peaks = peaks)
 
 if __name__ == '__main__':
     app.run(debug=True)
