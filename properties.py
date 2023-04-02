@@ -53,6 +53,7 @@ def create_body(mzxml_file):
                 if len(properties_dict[rt]) != 0:
                     end = len(str(properties_dict[rt])) - 1
                     properties_dict[rt] = (properties_dict[rt])[2:end]
+
                 # Append properties_dict to the scan_list
                 scan_list.append(properties_dict)
     return scan_list

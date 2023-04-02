@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Molecular Weight Search</title>
+	</head>
+	<body>
+		<h1>Molecular Weight Search</h1>
+		<form id="search-form">
+			<label for="molecular_weight">Molecular Weight:</label>
+			<input
+				type="number"
+				id="molecular_weight"
+				name="molecular_weight"
+				step="0.01"
+				required
+			/>
+			<button type="submit">Search</button>
+		</form>
+		<div id="results"></div>
+
+		<script>
+			document
+				.getElementById("search-form")
+				.addEventListener("submit", async (e) => {
+					e.preventDefault();
+					const molecular_weight =
+						document.getElementById("molecular_weight").value;
+
+					const response = await fetch("/search", {
+						method: "POST",
+						body: new FormData(e.target),
+					});
+
+					const results = await response.json();
+					const resultsContainer = document.getElementById("results");
+					resultsContainer.innerHTML = "";
+
+					if (results.error) {
+						resultsContainer.innerHTML = `<p>${results.error}</p>`;
+					} else {
+						results.forEach((result) => {
+							const resultDiv = document.createElement("div");
+							resultDiv.innerHTML = `
+                        <h3>${result.name}</h3>
+                        <p>CID: ${result.cid}</p>
+                        <p>Molecular Weight: ${result.molecular_weight.toFixed(
+													2
+												)}</p>
+                    `;
+							resultsContainer.appendChild(resultDiv);
+						});
+					}
+				});
+		</script>
+	</body>
+</html>
