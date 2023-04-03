@@ -8,29 +8,27 @@
   </head>
   <body>
     <nav class="navbar navbar-dark bg-dark">
-    <!-- Navbar content -->
+      <!-- Navbar content -->
     </nav>
-    <div class="container" style = "padding-top: 50px;">
-        <h2>Peak and Compound Information for Scan {{ value }}</h2>
+    <div class="container" style="padding-top: 50px;">
+      <h2>Peak and Compound Information for Scan {{ value }}</h2>
       <table class="table table-sm">
         <thead>
           <tr>
-            <th scope = "col">Peak #</th>
-            <th scope = "col">m/z</th>
+            <th scope="col">Peak #</th>
+            <th scope="col">m/z</th>
             <th scope="col">Intensity</th>
             <th scope="col">Possible Compound</th>
           </tr>
         </thead>
-        <tbody>
-            {% for t in range(0, peakLen) %}
-           <tr>
-               <td scope = "row">{{ t }}</td> 
-               <td scope = "row">{{peaks[t][index][0]}}</td>
-               <td scope = "row">{{peaks[t][index][1]}}</td>
-               <td scope = "row">C{{possibleCombo[t][0]}} H{{possibleCombo[t][1]}} O{{possibleCombo[t][2]}}</td>
-           </tr>
-            {% endfor %}
-        </tbody>
+        <tbody> {% for t in range(0, peakLen) %} <tr>
+            <td scope="row">{{ t }}</td>
+            <td scope="row">{{peaks[t][index][0]}}</td>
+            <td scope="row">{{peaks[t][index][1]}}</td>
+            <td scope="row">
+              <a href="/compound/{{ value }}/{{ t }}/{{ peaks[t][index][0] }}/{{ peaks[t][index][1] }}">Click to view</a>
+            </td>
+          </tr> {% endfor %} </tbody>
       </table>
     </div>
   </body>

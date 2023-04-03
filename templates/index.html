@@ -1,39 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="custom.css">
-
     <title>File Upload Menu for .mzXML Files</title>
-</head>
-
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="row">
-            <div class="col-md-6 offset-md-3 mt-5">
-                <h1 class="text-center mb-4">Upload .mzXML Files</h1>
-                <form action="/info" method="post" enctype="multipart/form-data">
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="fileUpload" name="fileUpload" accept=".mzxml" required>
-                        <label class="input-group-text" for="fileUpload">Choose file</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Upload</button>
-                </form>
+      <div class="row">
+        <div class="col-md-6 offset-md-3 mt-5">
+          <h1 class="text-center mb-4">Upload .mzXML Files</h1>
+          <form action="/info" method="post" enctype="multipart/form-data">
+            <div class="input-group mb-3">
+              <input type="file" class="form-control" id="fileUpload" name="fileUpload" accept=".mzxml" required>
+              <label class="input-group-text" for="fileUpload">Choose file</label>
             </div>
+            <button type="submit" class="btn btn-primary btn-block">Upload</button>
+          </form>
         </div>
+      </div>
     </div>
-
+    <div class = "p-3"></div>
+    <div class = "container">
+       <center>
+          <p>Created and tested based off <a href = "https://massive.ucsd.edu/ProteoSAFe/dataset_files.jsp?task=240e9132a08e480eb1152bf4fff49bfb#%7B%22table_sort_history%22%3A%22main.collection_asc%22%7D">this</a> data set and its respective .mzXML files.</p>
+          <p>This utility may or may not work with other .mzXML files depending on their format</p>
+        </center>
+    </div>
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-</body>
-
+  </body>
 </html>
