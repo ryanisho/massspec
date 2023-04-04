@@ -37,7 +37,8 @@ def info():
         sendCURL(url, file, name)
         # upload_to_bucket(name, file.read().decode('utf-8'))
         uri = 'gs://mzxmlfiles/' + name
-        mzxml_file = download_file_uri(uri, name)
+        #mzxml_file = download_file_uri(uri, name)
+        mzxml_file = None
 
         # Process the file using GCS file path
         header = create_header(mzxml_file)
