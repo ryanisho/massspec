@@ -33,7 +33,7 @@ def info():
     # Upload the file to Google Cloud Storage and parse it
     if file and allowed_file(name):
 
-        upload_to_bucket(name, name)
+        upload_to_bucket(name, file.read().decode('utf-8'))
         uri = 'gs://mzxmlfiles/' + name
         mzxml_file = download_file_uri(uri, name)
 
@@ -56,7 +56,7 @@ def info():
 @app.route("/peaks/files/<mzxml_file>/<int:value>", methods=["GET", "POST"])
 def peaks(mzxml_file, value):
     if request.method == "GET":
-        peaks = detect_peaks(mzxml_file, value)
+        peaks = detect_peaks("./files/" + mzxml_file, value)
         peakLen = len(peaks)
         index = "scan=" + str(value)
 
@@ -70,7 +70,7 @@ def peaks(mzxml_file, value):
 @app.route("/convert/files/<mzxml_file>", methods=["POST", "GET"])
 def convert(mzxml_file):
     xml_file = "output.xml"
-    mzxml_to_xml(mzxml_file, xml_file)
+    mzxml_to_xml("./files/" + mzxml_file, xml_file)
     return send_file(xml_file, as_attachment=True)
 
 

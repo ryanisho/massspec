@@ -21,7 +21,8 @@ def allowed_file(filename):
 def upload_to_bucket(blob_name, file_path):
     bucket = storage_client.get_bucket("mzxmlfiles")
     blob = bucket.blob(blob_name)
-    blob.upload_from_filename(file_path)
+    blob.upload_from_string(file_path)
+    #blob.upload_from_filename(file_path)
 
 def download_file_uri(uri, filename):
     f = open("./files/" + filename, "a")
