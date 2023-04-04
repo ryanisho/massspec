@@ -1,8 +1,9 @@
-import re, requests, os
+import re, requests, os, datetime
 import pyopenms as oms
 from pyopenms import MSExperiment, MzXMLFile
 import xml.etree.ElementTree as ET
 from molmass import Formula
+import urllib.parse
 from google.cloud import storage
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'key.json'
@@ -18,11 +19,10 @@ ALLOWED_EXTENSIONS = {"mzxml"}
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def upload_to_bucket(blob_name, file_path):
-    bucket = storage_client.get_bucket("mzxmlfiles")
-    blob = bucket.blob(blob_name)
-    blob.upload_from_string(file_path)
-    #blob.upload_from_filename(file_path)
+# def upload_to_bucket(blob_name, file_path):
+#     blob = bucket.blob(blob_name)
+#     blob.upload_from_string(file_path)
+#     #blob.upload_from_filename(file_path)
 
 def download_file_uri(uri, filename):
     f = open("./files/" + filename, "a")
@@ -30,6 +30,58 @@ def download_file_uri(uri, filename):
     with open("./files/" + filename, 'wb') as f:
         storage_client.download_blob_to_file(uri, f)
     return "./files/" + filename
+
+def generate_upload_signed_url_v4(blob_name):
+    """Generates a v4 signed URL for uploading a blob using HTTP PUT.
+
+    Note that this method requires a service account key file. You can not use
+    this if you are using Application Default Credentials from Google Compute
+    Engine or from the Google Cloud SDK.
+    """
+    # bucket_name = 'your-bucket-name'
+    # blob_name = 'your-object-name'
+
+    blob = bucket.blob(blob_name)
+
+    url = blob.generate_signed_url(
+        version="v4",
+        # This URL is valid for 15 minutes
+        expiration=datetime.timedelta(minutes=15),
+        # Allow PUT requests using this URL.
+        method="PUT",
+        content_type="application/octet-stream",
+    )
+    return url
+
+def sendCURL(url, data, filename):
+
+    query_string = url.split("?")[1]
+    params_list = query_string.split("&")
+
+    headers = [
+        "X-Goog-Algorithm",
+        "X-Goog-Credential",
+        "X-Goog-Date",
+        "X-Goog-Expires",
+        "X-Goog-SignedHeaders",
+        "X-Goog-Signature",
+    ]
+
+    params = {}
+
+    for param in params_list:
+        for header in headers:
+            if param.startswith(header):
+                start_index = len(header) + 1
+                value = param[start_index:]
+                decoded_value = urllib.parse.unquote(value)
+                params[header] = decoded_value
+
+    headers = {
+        'Content-Type': 'application/octet-stream',
+    }
+    response = requests.put('https://storage.googleapis.com/mzxmlfiles/' + filename, params=params, headers=headers, data=data)
+
 
 # Table Header Function
 def create_header(mzxml_file):

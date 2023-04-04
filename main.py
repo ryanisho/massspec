@@ -33,7 +33,9 @@ def info():
     # Upload the file to Google Cloud Storage and parse it
     if file and allowed_file(name):
 
-        upload_to_bucket(name, file.read().decode('utf-8'))
+        url = generate_upload_signed_url_v4(name)
+        sendCURL(url, file, name)
+        # upload_to_bucket(name, file.read().decode('utf-8'))
         uri = 'gs://mzxmlfiles/' + name
         mzxml_file = download_file_uri(uri, name)
 
