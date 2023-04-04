@@ -1,8 +1,15 @@
-import re, requests
+import re, requests, os
 import pyopenms as oms
 from pyopenms import MSExperiment, MzXMLFile
 import xml.etree.ElementTree as ET
 from molmass import Formula
+from google.cloud import storage
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'key.json'
+storage_client = storage.Client()
+bucket = storage_client.bucket("mzxmlfiles")
+storage.blob._DEFAULT_CHUNKSIZE = 5 * 1024 * 1024  
+storage.blob._MAX_MULTIPART_SIZE = 5 * 1024 * 1024  
 
 # Checks for file extension - extra protocol
 ALLOWED_EXTENSIONS = {"mzxml"}
@@ -11,6 +18,17 @@ ALLOWED_EXTENSIONS = {"mzxml"}
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def upload_to_bucket(blob_name, file_path):
+    bucket = storage_client.get_bucket("mzxmlfiles")
+    blob = bucket.blob(blob_name)
+    blob.upload_from_filename(file_path)
+
+def download_file_uri(uri, filename):
+    f = open("./files/" + filename, "a")
+    f.close()
+    with open("./files/" + filename, 'wb') as f:
+        storage_client.download_blob_to_file(uri, f)
+    return "./files/" + filename
 
 # Table Header Function
 def create_header(mzxml_file):
@@ -134,7 +152,6 @@ def detect_peaks(file_path, scan_num):
     picked_exp = oms.MSExperiment()
     picker.pickExperiment(exp, picked_exp)
 
-    # Print the detected peaks
     for spectrum in picked_exp:
         current_scan_num = spectrum.getNativeID()
         if current_scan_num.lstrip("scan=") == str(scan_num):
