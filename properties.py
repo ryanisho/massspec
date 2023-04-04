@@ -31,57 +31,14 @@ def download_file_uri(uri, filename):
         storage_client.download_blob_to_file(uri, f)
     return "./files/" + filename
 
-def generate_upload_signed_url_v4(blob_name):
-    """Generates a v4 signed URL for uploading a blob using HTTP PUT.
+def upload_large_file(file, destination_blob_name):
+    """Upload a large file to the specified GCP bucket."""
+    blob = bucket.blob(destination_blob_name)
 
-    Note that this method requires a service account key file. You can not use
-    this if you are using Application Default Credentials from Google Compute
-    Engine or from the Google Cloud SDK.
-    """
-    # bucket_name = 'your-bucket-name'
-    # blob_name = 'your-object-name'
+    # Use the `chunk_size` option to enable resumable uploads for large files
+    blob.chunk_size = 5 * 1024 * 1024  # Set chunk size to 5MB
 
-    blob = bucket.blob(blob_name)
-
-    url = blob.generate_signed_url(
-        version="v4",
-        # This URL is valid for 15 minutes
-        expiration=datetime.timedelta(minutes=15),
-        # Allow PUT requests using this URL.
-        method="PUT",
-        content_type="application/octet-stream",
-    )
-    return url
-
-def sendCURL(url, data, filename):
-
-    query_string = url.split("?")[1]
-    params_list = query_string.split("&")
-
-    headers = [
-        "X-Goog-Algorithm",
-        "X-Goog-Credential",
-        "X-Goog-Date",
-        "X-Goog-Expires",
-        "X-Goog-SignedHeaders",
-        "X-Goog-Signature",
-    ]
-
-    params = {}
-
-    for param in params_list:
-        for header in headers:
-            if param.startswith(header):
-                start_index = len(header) + 1
-                value = param[start_index:]
-                decoded_value = urllib.parse.unquote(value)
-                params[header] = decoded_value
-
-    headers = {
-        'Content-Type': 'application/octet-stream',
-    }
-    response = requests.put('https://storage.googleapis.com/mzxmlfiles/' + filename, params=params, headers=headers, data=data)
-
+    blob.upload_from_file(file, content_type="application/octet-stream")
 
 # Table Header Function
 def create_header(mzxml_file):
