@@ -9,7 +9,6 @@ from flask import (
 from pyopenms import MSExperiment, MzXMLFile
 import io, os, string, re, requests
 from properties import *
-from google.cloud import storage
 
 app = Flask(__name__)
 

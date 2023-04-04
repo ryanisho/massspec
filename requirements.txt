@@ -1,4 +1,6 @@
 Flask==2.1.2
 molmass==2022.12.9
+protobuf==4.22.1
 pyopenms==2.7.0
 requests==2.28.2
+google-cloud-storage==2.8.0
