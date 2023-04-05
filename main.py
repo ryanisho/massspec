@@ -33,12 +33,8 @@ def info():
     # Upload the file to Google Cloud Storage and parse it
     if file and allowed_file(name):
 
-        # url = generate_upload_signed_url_v4(name)
-        # sendCURL(url, file, name)
-        # upload_to_bucket(name, file.read().decode('utf-8'))
-        upload_large_file(file, name)
-        uri = 'gs://mzxmlfiles/' + name
-        mzxml_file = download_file_uri(uri, name)
+        upload_file(file, name)
+        mzxml_file = download_file(name)
 
         # Process the file using GCS file path
         header = create_header(mzxml_file)

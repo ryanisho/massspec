@@ -19,26 +19,15 @@ ALLOWED_EXTENSIONS = {"mzxml"}
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# def upload_to_bucket(blob_name, file_path):
-#     blob = bucket.blob(blob_name)
-#     blob.upload_from_string(file_path)
-#     #blob.upload_from_filename(file_path)
+def upload_file(file, name):
+    blob = bucket.blob(name)
+    blob.upload_from_file(file.stream)
 
-def download_file_uri(uri, filename):
-    f = open("./files/" + filename, "a")
-    f.close()
-    with open("./files/" + filename, 'wb') as f:
-        storage_client.download_blob_to_file(uri, f)
-    return "./files/" + filename
-
-def upload_large_file(file, destination_blob_name):
-    """Upload a large file to the specified GCP bucket."""
-    blob = bucket.blob(destination_blob_name)
-
-    # Use the `chunk_size` option to enable resumable uploads for large files
-    blob.chunk_size = 5 * 1024 * 1024  # Set chunk size to 5MB
-
-    blob.upload_from_file(file, content_type="application/octet-stream")
+def download_file(filename):
+    path = './files/' + filename
+    blob = bucket.blob(filename)
+    blob.download_to_filename(path)
+    return path
 
 # Table Header Function
 def create_header(mzxml_file):
